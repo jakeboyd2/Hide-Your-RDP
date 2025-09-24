@@ -2,10 +2,15 @@
 
 ## Introduction
 
-**Hunter:** [Your Name]  
-**Date:** [Investigation Date - YYYY-MM-DD]  
-**Environment/Dataset:** [Cyber Range Environment / Dataset Details]  
-**Objective:** [Primary goal and scope of the threat hunt investigation]
+**Hunter:** Jake Boyd  
+**Date:** September 21, 2025  
+**Environment/Dataset:** Cyber Range — Log Analytics Workspace (Microsoft Sentinel / MDE / Advanced Hunting)  
+**Objective:** Investigate suspicious activity on a cloud VM (DeviceName contains flare) for 2025-09-14, reconstruct the attack timeline, identify IOCs, and assess scope/impact.
+
+---
+## TL;DR  
+
+An external actor performed RDP password-guessing and successfully authenticated as ```slflare``` from ```159.26.106.84```. They executed ```msupdate.exe``` which ran a PowerShell script, created persistence via a scheduled task named ```MicrosoftUpdateSync```, added a Microsoft Defender exclusion for ```C:\Windows\Temp```, staged data into ```backup_sync.zip```, and attempted exfiltration to ```185.92.220.87:8081```.
 
 ---
 

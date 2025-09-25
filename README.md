@@ -16,6 +16,7 @@ Huge thanks to <a href="https://www.linkedin.com/in/mohammedsanclogic/">Mohammed
 The threat hunt template includes the following standardized sections:
 
 - **Introduction** - Hunter details, date, environment, and objective
+- **Summary** - Brief overview
 - **Key Findings** - Summary of critical discoveries
 - **Artifacts & Evidence** - KQL queries and supporting evidence
 - **IoCs** - Indicators of Compromise (network and host-based)

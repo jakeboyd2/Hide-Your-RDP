@@ -8,7 +8,7 @@
 **Objective:** Investigate suspicious activity on a cloud VM (DeviceName contains `flare`), reconstruct the attack timeline, identify IOCs, and assess scope/impact.
 
 ---
-## TL;DR  
+## Summary
 
 An external actor performed RDP password-guessing and successfully authenticated as ```slflare``` from ```159.26.106.84```. They executed ```msupdate.exe``` which ran a PowerShell script, created persistence via a scheduled task named ```MicrosoftUpdateSync```, added a Microsoft Defender exclusion for ```C:\Windows\Temp```, staged data into ```backup_sync.zip```, and attempted exfiltration to ```185.92.220.87:8081```.
 

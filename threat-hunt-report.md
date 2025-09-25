@@ -220,9 +220,10 @@ DeviceProcessEvents
 - Remove exclusion for `C:\Windows\Temp`
 
 ### Medium-term Improvements (1-4 weeks)
-- Implement network-level RDP restrictions: only via secure bastion or jump host.
-- Enforce MFA on all remote access methods.
-- Conduct user and admin training on password security and remote access risks.
+- Remove direct RDP exposure.
+- Enforce MFA on all remote access.
+- Use Azure Bastion or Just-in-Time VM access.
+- Review account lockout policies and password strength to stop brute-force.
 
 ### Long-term Strategic Changes (1-3 months)
 - Phase out direct RDP — replace with secure remote management solutions (e.g., Azure Bastion, privileged access workstations).

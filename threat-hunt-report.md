@@ -241,6 +241,36 @@ DeviceProcessEvents
 
 ---
 
+## Timeline of Attacker Activity
+
+| Date              | Event/Activity                                                 | Details/Artifacts                                          |
+|--------------------|---------------------------------------------------------------|------------------------------------------------------------|
+| 2025-09-16         | RDP brute-force attempts                                      | Multiple failed logons from `159.26.106.84`                |
+| 2025-09-16         | Successful RDP authentication                                 | Account `slflare` logged in via RDP from `159.26.106.84`   |
+| 2025-09-16–20      | Malicious PowerShell execution                                | Ran `msupdate.exe` with bypass, executed `update_check.ps1`|
+| 2025-09-16–20      | Persistence established                                       | Created scheduled task `MicrosoftUpdateSync`               |
+| 2025-09-16–20      | Defender exclusion added                                      | Excluded `C:\Windows\Temp` in AV settings                  |
+| 2025-09-16–20      | Discovery commands run                                        | `systeminfo` and other commands executed                   |
+| 2025-09-16–20      | Data staged for exfiltration                                  | Created `backup_sync.zip`                                  |
+| 2025-09-16–20      | Exfiltration attempt                                          | C2 connection to `185.92.220.87:8081`                      |
+
+---
+
+## MITRE ATT&CK Mapping
+
+| Tactic                | Technique                               | Technique ID  | Description/Context                                 |
+|-----------------------|-----------------------------------------|--------------|-----------------------------------------------------|
+| Initial Access        | Brute Force: Remote Services            | T1110.001    | RDP password-guessing from external IP              |
+| Execution             | Command and Scripting Interpreter: PowerShell | T1059.001    | PowerShell script run via `msupdate.exe`            |
+| Persistence           | Scheduled Task/Job                      | T1053.005    | Scheduled task `MicrosoftUpdateSync` created        |
+| Defense Evasion       | Impair Defenses: Indicator Removal      | T1070        | AV exclusions added for `C:\Windows\Temp`           |
+| Discovery             | System Information Discovery            | T1082        | `systeminfo` and related commands executed          |
+| Collection            | Archive Collected Data                  | T1560        | Staged data in `backup_sync.zip`                    |
+| Exfiltration          | Exfiltration Over C2 Channel            | T1041        | Data sent to `185.92.220.87:8081`                   |
+
+
+---
+
 ### Contact Information
 **Primary Analyst:**  
 - **Name:** Jake Boyd

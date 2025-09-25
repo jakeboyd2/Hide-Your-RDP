@@ -5,7 +5,7 @@
 **Hunter:** Jake Boyd  
 **Date:** September 21, 2025  
 **Environment/Dataset:** Cyber Range — Log Analytics Workspace (Microsoft Sentinel / MDE / Advanced Hunting)  
-**Objective:** Investigate suspicious activity on a cloud VM (DeviceName contains flare) for 2025-09-14, reconstruct the attack timeline, identify IOCs, and assess scope/impact.
+**Objective:** Investigate suspicious activity on a cloud VM (DeviceName contains flare), reconstruct the attack timeline, identify IOCs, and assess scope/impact.
 
 ---
 ## TL;DR  
@@ -16,18 +16,23 @@ An external actor performed RDP password-guessing and successfully authenticated
 
 ## Key Findings
 
-### Summary
-[Provide a high-level summary of the most critical findings from your threat hunt]
-
-### Critical Observations
-- [Finding 1]
-- [Finding 2]
-- [Finding 3]
+- **Initial access (RDP brute force):** `159.26.106.84`
+- **Compromised account:** `slflare`
+- **Executed binary:** `msupdate.exe`
+- **Command line used:**
+    
+    `"msupdate.exe" -ExecutionPolicy Bypass -File C:\Users\Public\update_check.ps1`
+- **Persistence:** Scheduled Task `MicrosoftUpdateSync`
+- **Defender modification:** Exclusion added: `C:\Windows\Temp`
+- **Discovery command observed:** `"cmd.exe" /c systeminfo`
+- **Data staged for exfil:** `backup_sync.zip`
+- **C2 / Exfil destination:** `185.92.220.87`
+- **Exfil endpoint and port:** `185.92.220.87:8081`
 
 ### Risk Assessment
-**Risk Level:** [Low/Medium/High/Critical]  
-**Confidence Level:** [Low/Medium/High]  
-**Impact Assessment:** [Brief description of potential impact]
+**Risk Level:** High/Critical  
+**Confidence Level:** High  
+**Impact Assessment:** An external actor gained RDP access using the ```slflare``` account, established persistence and Defender exclusions, staged sensitive data, and attempted exfiltration to a remote server.  
 
 ---
 
@@ -35,29 +40,114 @@ An external actor performed RDP password-guessing and successfully authenticated
 
 ### KQL Queries Used
 
-#### Query 1: [Query Purpose/Label]
+#### Query 1: Failed logons (brute force patterns)
 ```kql
-// [Brief description of what this query accomplishes]
-[Paste your KQL query here]
+// This query finds all failed logons where the device name contains "flare" per the hint and looks in the given time range
+// The "project" part of the query allows for a more precise view of relevant data lessening noise
+DeviceLogonEvents
+| where ActionType == "LogonFailed"
+| where DeviceName contains "flare"
+| where Timestamp  between (datetime(2025-09-16T00:00:00Z) .. datetime(2025-09-17T23:59:59Z))
+| order by Timestamp desc
+| project Timestamp, DeviceId, DeviceName, ActionType, LogonType, AccountName
 ```
 
-**Results:** [Summary of results or key observations]
+**Results:** Clear indication of brute force attempts highlighted by the rapid rate (Timestamp) and varying account names (AccountName)  
 
-#### Query 2: [Query Purpose/Label]
+<img width="972" height="676" alt="image" src="https://github.com/user-attachments/assets/9eb20b19-57ef-4b3b-ac85-6e3b80dbf12b" />
+
+
+#### Query 2: Determine username (compromised account)
 ```kql
-// [Brief description of what this query accomplishes]
-[Paste your KQL query here]
+// This query finds the username that was used during the successful RDP login associated with the attacker's IP
+DeviceLogonEvents
+| where ActionType == "LogonSuccess"
+| where LogonType == "RemoteInteractive"
+| where RemoteIP == "159.26.106.84"
+| where Timestamp  between (datetime(2025-09-13T07:53:53.7612957Z) .. datetime(2025-09-17T23:59:59Z))
+| order by Timestamp asc
+| project Timestamp, DeviceId, DeviceName, ActionType, LogonType, AccountName
 ```
 
-**Results:** [Summary of results or key observations]
+**Results:** One result showing ```slflare``` successful logon via RDP (RemoteInteractive)
+<img width="1088" height="379" alt="image" src="https://github.com/user-attachments/assets/f184df5e-ab67-40b5-a32d-43707bfa358d" />
 
-#### Query 3: [Query Purpose/Label]
+#### Query 3: Suspicious binary (executed binary name)
 ```kql
-// [Brief description of what this query accomplishes]
-[Paste your KQL query here]
+// This query shows processes invoked by the compromised account name
+DeviceProcessEvents
+| where AccountName == "slflare"
+| where TimeGenerated between (datetime(2025-09-16T00:00:00Z) .. datetime(2025-09-20T23:59:59Z))
+| where ProcessCommandLine contains "Bypass"
+| project TimeGenerated, AccountName, ActionType, DeviceName, FolderPath, ProcessCommandLine 
 ```
 
-**Results:** [Summary of results or key observations]
+**Results:** Command line execution artifact
+
+<img width="1541" height="275" alt="image" src="https://github.com/user-attachments/assets/5e4728dc-73c4-41f4-9b1d-db57ba2448df" />
+
+#### Query 4: Persistence mechanism
+```kql
+// This query shows registry keys with the TaskCache subkey which stores metadata about scheduled tasks
+DeviceRegistryEvents
+| where PreviousRegistryKey startswith @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache"
+| where DeviceName == "slflarewinsysmo"
+| order by Timestamp desc
+| project ActionType, PreviousRegistryKey
+```
+
+**Results:** Suspicious registry key deletion 
+<img width="959" height="339" alt="image" src="https://github.com/user-attachments/assets/1f885fb5-ec60-4ac6-a6a1-7e1f9a67da3b" />
+
+#### Query 5: Defense Evasion
+```kql
+// This query searches for all registry keys containing "Exclusions"
+DeviceRegistryEvents
+| where DeviceName == "slflarewinsysmo"
+| where PreviousRegistryKey contains "Exclusions"
+| order by Timestamp desc
+```
+
+**Results:** Folder path the attacker added to Windows Defender’s exclusions after establishing persistence: ```C:\Windows\Temp```
+<img width="816" height="337" alt="image" src="https://github.com/user-attachments/assets/800b826a-3477-4dde-adb7-5eb7ab164cb6" />
+
+#### Query 6: Discovery Command
+```kql
+// This query searches for common discovery commands
+DeviceProcessEvents
+| where AccountName == "slflare"
+| where ProcessCommandLine has_any ("whoami", "hostname", "ipconfig /all", "net user", "net localgroup", "net group /domain", "net view", "net view /domain", "netstat -ano", "tasklist", "systeminfo", "wmic qfe", "wmic process list", "query user", "arp -a", "route print", "nslookup", "nltest /dclist:domain", "nltest /domain_trusts", "dsquery user", "dsquery computer")
+| project Timestamp, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine
+| where Timestamp between (datetime(2025-09-14T07:53:53.7612957Z) .. datetime(2025-09-20T23:59:59Z))
+| order by Timestamp desc
+```
+
+**Results:** Command line system discovery artifact
+
+<img width="1004" height="597" alt="image" src="https://github.com/user-attachments/assets/c003644a-85b6-40c8-bd23-c2559be8c75a" />
+
+#### Query 7: Archive File
+```kql
+// This query finds files that have extensions indicating compression and are in non-standard directories
+DeviceFileEvents
+| where DeviceName == "slflarewinsysmo"
+| where Timestamp between (datetime(2025-09-14T07:53:53.7612957Z) .. datetime(2025-09-20T23:59:59Z))
+| where FileName endswith ".zip" or FileName endswith ".rar" or FileName endswith ".7z"
+| where FolderPath has_any ("\\Temp\\", "\\AppData\\", "\\ProgramData\\")
+| project Timestamp, DeviceName, InitiatingProcessAccountName, FileName, FolderPath, InitiatingProcessCommandLine
+| order by Timestamp desc
+```
+
+**Results:** Archive file the attacker created to prepare for exfiltration
+
+<img width="1598" height="618" alt="image" src="https://github.com/user-attachments/assets/fcd708e1-0cac-47cb-b03a-73d20c397ef3" />
+
+#### Query 8: C2 Connection
+```kql
+// 
+```
+
+**Results:** 
 
 ### Additional Evidence
 - **Log Files:** [Specify relevant log sources]
@@ -251,6 +341,6 @@ An external actor performed RDP password-guessing and successfully authenticated
 
 ---
 
-**Document Classification:** [Internal/Confidential/Restricted]  
-**Last Updated:** [Date]  
-**Version:** [Version number]
+**Document Classification:** Internal 
+**Last Updated:** September 24, 2025
+**Version:** 1.0

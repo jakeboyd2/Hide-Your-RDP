@@ -2,7 +2,7 @@
 Suspected cloud virtual machine intrusion within Cyber Range environment
 
 ## Overview
-This repository contains threat hunting documentation and analysis for a suspected intrusion incident that occurred on September 21, 2025, within a cyber range environment. The investigation focuses on potential compromise of cloud virtual machines and associated infrastructure.
+This repository contains threat hunting documentation and analysis for a suspected intrusion incident that occurred within a cyber range environment. The investigation focuses on potential compromise of cloud virtual machines and associated infrastructure.
 
 ## Thanks
 Huge thanks to <a href="https://www.linkedin.com/in/mohammedsanclogic/">Mohammed</a> for engineering the hunt and <a href="https://www.linkedin.com/in/joshmadakor/">Josh</a> for architecting the cyber range infrastructure. 

@@ -1,4 +1,5 @@
 # Threat Hunt Report
+<img width="593" height="582" alt="image" src="https://github.com/user-attachments/assets/6bbba18f-c446-43d3-896d-98740a195021" />
 
 ## Introduction
 
@@ -173,7 +174,7 @@ DeviceProcessEvents
 
 ---
 
-## IoCs (Indicators of Compromise)
+## Indicators of Compromise (IoCs)
 
 ### Network Indicators
 - **IP Addresses:**
@@ -183,6 +184,18 @@ DeviceProcessEvents
 ### User Account Indicators
 - **Compromised Accounts:**
   - `slflare` - Account compromised
+ 
+### Files
+- **Archive staged for exfil**
+  - `backup_sync.zip`     
+
+### Defense Evasion
+- **Path Added to Windows Defender Exclusions**
+  - `C:\Windows\Temp`
+
+---
+
+## Tactics, Techniques, and Procedures (TTPs)
 
 - **Suspicious Account Activity:**
   - Multiple failed logins followed by successful login
@@ -196,14 +209,15 @@ DeviceProcessEvents
 
 ### Immediate Actions Required
 1. Isolate `slflarewinsysmo` device.
-2. Disable `slflare` account.
-3. Block RDP from malicious IP `159.26.106.84` in NSG/Firewall.
-4. Block outbound connections to `182.92.220.87:8081`.
+2. Revoke sessions and reset credentials for `slflare` account.
+3. Confirm malicious IPs VirusTotal, AbuseIPDB, Shodan, Whois
+4. Block RDP from malicious IP `159.26.106.84` in NSG/Firewall.
+5. Block outbound connections to `185.92.220.87:8081`.
 
 ### Short-term Remediation (1-7 days)
 - Enforce password resets across privileged and high-value accounts.
 - Disable direct RDP exposure to the internet or restrict it with VPN + MFA.
-- Re-baseline and re-enable Microsoft Defender protections, ensuring exclusions are reviewed/removed.
+- Remove exclusion for `C:\Windows\Temp`
 
 ### Medium-term Improvements (1-4 weeks)
 - Implement network-level RDP restrictions: only via secure bastion or jump host.

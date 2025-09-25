@@ -20,5 +20,5 @@ The threat hunt template includes the following standardized sections:
 - **Artifacts & Evidence** - KQL queries and supporting evidence
 - **IoCs** - Indicators of Compromise (network and host-based)
 - **Recommendations/Next Steps** - Actionable remediation steps
-- **Attribution & Contact** - Threat actor assessment and contact information
+- **Contact** - Contact information
 

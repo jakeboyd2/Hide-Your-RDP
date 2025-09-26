@@ -5,7 +5,7 @@ Suspected cloud virtual machine intrusion within Cyber Range environment
 This repository contains threat hunting documentation and analysis for a suspected intrusion incident that occurred within a cyber range environment. The investigation focuses on potential compromise of cloud virtual machines and associated infrastructure.
 
 ## Thanks
-Huge thanks to <a href="https://www.linkedin.com/in/mohammedsanclogic/">Mohammed</a> for engineering the hunt and <a href="https://www.linkedin.com/in/joshmadakor/">Josh</a> for architecting the cyber range infrastructure. 
+Huge thanks to <a href="https://www.linkedin.com/in/mohammedsanclogic/">Mohammed</a> for engineering the hunt and <a href="https://www.linkedin.com/in/joshmadakor/">Josh</a> for providing the cyber range environment. 
 
 ## Repository Contents
 

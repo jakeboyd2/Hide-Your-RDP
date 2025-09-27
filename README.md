@@ -9,7 +9,7 @@ Huge thanks to <a href="https://www.linkedin.com/in/mohammedsanclogic/">Mohammed
 
 ## Repository Contents
 
-- **[threat-hunt-report](threat-hunt-report.md)** 
+- **[threat-hunt-report](report.md)** 
 
 ## Sections
 

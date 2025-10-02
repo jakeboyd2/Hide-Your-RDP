@@ -244,20 +244,6 @@ DeviceProcessEvents
 - **Query Languages:** KQL
 - **Data Sources:** Azure, Logs Analytics Workspace (LAW), Microsoft Defender for Endpoint (MDE)
 
----
-
-## Timeline of Attacker Activity
-
-| Date              | Event/Activity                                                 | Details/Artifacts                                          |
-|--------------------|---------------------------------------------------------------|------------------------------------------------------------|
-| 2025-09-16         | RDP brute-force attempts                                      | Multiple failed logons from `159.26.106.84`                |
-| 2025-09-16         | Successful RDP authentication                                 | Account `slflare` logged in via RDP from `159.26.106.84`   |
-| 2025-09-16–20      | Malicious PowerShell execution                                | Ran `msupdate.exe` with bypass, executed `update_check.ps1`|
-| 2025-09-16–20      | Persistence established                                       | Created scheduled task `MicrosoftUpdateSync`               |
-| 2025-09-16–20      | Defender exclusion added                                      | Excluded `C:\Windows\Temp` in AV settings                  |
-| 2025-09-16–20      | Discovery commands run                                        | `systeminfo` and other commands executed                   |
-| 2025-09-16–20      | Data staged for exfiltration                                  | Created `backup_sync.zip`                                  |
-| 2025-09-16–20      | Exfiltration attempt                                          | C2 connection to `185.92.220.87:8081`                      |
 
 ---
 
@@ -285,5 +271,4 @@ DeviceProcessEvents
 ---
 
 **Document Classification:** Internal  
-**Last Updated:** September 27, 2025  
 **Version:** 1.0
